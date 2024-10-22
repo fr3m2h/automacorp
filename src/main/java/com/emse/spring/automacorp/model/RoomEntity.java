@@ -95,4 +95,12 @@ public class RoomEntity {
     public void setCurrentTemperature(SensorEntity currentTemperature) {
         this.currentTemperature = currentTemperature;
     }
+
+    public List<HeaterEntity> getHeaters() {
+        return heaters;
+    }
+
+    public void setHeaters(List<HeaterEntity> heaters) {
+        this.heaters = heaters;
+    }
 }
