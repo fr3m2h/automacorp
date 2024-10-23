@@ -34,10 +34,10 @@ public class RoomEntity {
 
     public RoomEntity() {}
 
-    public RoomEntity(Integer floor, String name, BuildingEntity building) {
+    public RoomEntity(Integer floor, String name, double targetTemperature) {
         this.floor = floor;
         this.name = name;
-        this.building = building;
+        this.targetTemperature = targetTemperature;
     }
 
     public Integer getFloor() {
