@@ -3,9 +3,9 @@ package com.emse.spring.automacorp.dto;
 
 import java.util.List;
 
-public record GouvRespDto(
+public record ApiGouvResponse(
         String version,
-        List<GouvFeatureDto> features
+        List<ApiGouvFeature> features
 ) {
 
 }

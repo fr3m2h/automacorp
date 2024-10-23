@@ -1,6 +1,6 @@
 package com.emse.spring.automacorp.dto;
 
-public record GouvAdressDto(
+public record ApiGouvAddress(
         String id,
         String label,
         String housenumber,

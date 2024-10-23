@@ -5,24 +5,30 @@ import com.emse.spring.automacorp.dto.WindowDto;
 import com.emse.spring.automacorp.model.RoomEntity;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RoomMapper {
+
     public static RoomDto of(RoomEntity roomEntity) {
-        List<WindowDto> windows = roomEntity.getWindows().stream()
-                .map(WindowMapper::of)
-                .toList();
-
-        Double currentTemperatureValue = roomEntity.getCurrentTemperature() != null
-                ? roomEntity.getCurrentTemperature().getValue()
-                : null;
-
         return new RoomDto(
                 roomEntity.getId(),
                 roomEntity.getName(),
                 roomEntity.getFloor(),
-                currentTemperatureValue,
+                extractCurrentTemperature(roomEntity),
                 roomEntity.getTargetTemperature(),
-                windows
+                mapWindows(roomEntity)
         );
+    }
+
+    private static Double extractCurrentTemperature(RoomEntity roomEntity) {
+        return roomEntity.getCurrentTemperature() == null
+                ? null
+                : roomEntity.getCurrentTemperature().getValue();
+    }
+
+    private static List<WindowDto> mapWindows(RoomEntity roomEntity) {
+        return roomEntity.getWindows().stream()
+                .map(WindowMapper::of)
+                .collect(Collectors.toList());
     }
 }

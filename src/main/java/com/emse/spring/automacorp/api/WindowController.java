@@ -21,41 +21,50 @@ public class WindowController {
 
     @GetMapping
     public List<WindowDto> findAll() {
-        return windowDao.findAll().stream().map(WindowMapper::of).collect(Collectors.toList());
+        return windowDao.findAll()
+                .stream()
+                .map(WindowMapper::of)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
     public WindowDto findById(@PathVariable Long id) {
-        return windowDao.findById(id).map(WindowMapper::of).orElse(null);
+        return windowDao.findById(id)
+                .map(WindowMapper::of)
+                .orElse(null);
     }
 
     @PostMapping
     public ResponseEntity<WindowDto> create(@RequestBody WindowDto dto) {
-        WindowEntity entity = new WindowEntity(dto.name(), null, null);
-        WindowEntity saved = windowDao.save(entity);
-        return ResponseEntity.ok(WindowMapper.of(saved));
+        WindowEntity newWindowEntity = createWindowEntity(dto);
+        WindowEntity savedEntity = windowDao.save(newWindowEntity);
+        return ResponseEntity.ok(WindowMapper.of(savedEntity));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<WindowDto> update(@PathVariable Long id, @RequestBody WindowCommand window) {
-        WindowEntity entity = windowDao.findById(id).orElse(null);
-        if (entity == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        entity.setName(window.name());
-        entity.getWindowStatus().setName(window.windowStatus().name());
-        entity.getWindowStatus().setValue(window.windowStatus().value());
-        entity.getWindowStatus().setSensorType(window.windowStatus().sensorType());
-
-        windowDao.save(entity);
-
-        return ResponseEntity.ok(WindowMapper.of(entity));
+        return windowDao.findById(id)
+                .map(existingWindow -> updateWindowEntity(existingWindow, window))
+                .map(updatedWindow -> ResponseEntity.ok(WindowMapper.of(updatedWindow)))
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
-
-
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         windowDao.deleteById(id);
+    }
+
+    private WindowEntity createWindowEntity(WindowDto dto) {
+        return new WindowEntity(dto.name(), null, null);
+    }
+
+    private WindowEntity updateWindowEntity(WindowEntity existingWindow, WindowCommand window) {
+        existingWindow.setName(window.name());
+        if (existingWindow.getWindowStatus() != null) {
+            existingWindow.getWindowStatus().setName(window.windowStatus().name());
+            existingWindow.getWindowStatus().setValue(window.windowStatus().value());
+            existingWindow.getWindowStatus().setSensorType(window.windowStatus().sensorType());
+        }
+        return windowDao.save(existingWindow);
     }
 }

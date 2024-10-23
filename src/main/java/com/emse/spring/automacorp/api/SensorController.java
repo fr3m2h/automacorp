@@ -34,30 +34,24 @@ public class SensorController {
 
     @GetMapping(path = "/{id}")
     public SensorDto findById(@PathVariable Long id) {
-        return sensorDao.findById(id).map(SensorMapper::of).orElse(null);
+        return sensorDao.findById(id)
+                .map(SensorMapper::of)
+                .orElse(null);
     }
 
     @PostMapping
     public ResponseEntity<SensorDto> create(@RequestBody SensorCommand sensor) {
-        SensorEntity entity = new SensorEntity(sensor.sensorType(), sensor.name());
-        entity.setValue(sensor.value());
-        SensorEntity saved = sensorDao.save(entity);
-        return ResponseEntity.ok(SensorMapper.of(saved));
+        SensorEntity newSensorEntity = createSensorEntity(sensor);
+        SensorEntity savedEntity = sensorDao.save(newSensorEntity);
+        return ResponseEntity.ok(SensorMapper.of(savedEntity));
     }
 
     @PutMapping(path = "/{id}")
     public ResponseEntity<SensorDto> update(@PathVariable Long id, @RequestBody SensorCommand sensor) {
-        SensorEntity entity = sensorDao.findById(id).orElse(null);
-        if (entity == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        entity.setValue(sensor.value());
-        entity.setName(sensor.name());
-        entity.setSensorType(sensor.sensorType());
-
-        sensorDao.save(entity);
-
-        return ResponseEntity.ok(SensorMapper.of(entity));
+        return sensorDao.findById(id)
+                .map(existingSensor -> updateSensorEntity(existingSensor, sensor))
+                .map(updatedSensor -> ResponseEntity.ok(SensorMapper.of(updatedSensor)))
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
     @DeleteMapping(path = "/{id}")
@@ -65,6 +59,16 @@ public class SensorController {
         sensorDao.deleteById(id);
     }
 
+    private SensorEntity createSensorEntity(SensorCommand sensor) {
+        SensorEntity sensorEntity = new SensorEntity(sensor.sensorType(), sensor.name());
+        sensorEntity.setValue(sensor.value());
+        return sensorEntity;
+    }
 
+    private SensorEntity updateSensorEntity(SensorEntity existingSensor, SensorCommand sensor) {
+        existingSensor.setValue(sensor.value());
+        existingSensor.setName(sensor.name());
+        existingSensor.setSensorType(sensor.sensorType());
+        return sensorDao.save(existingSensor);
+    }
 }
-

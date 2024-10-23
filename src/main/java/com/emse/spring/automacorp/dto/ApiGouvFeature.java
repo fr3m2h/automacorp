@@ -1,7 +1,7 @@
 package com.emse.spring.automacorp.dto;
 
-public record GouvFeatureDto(
+public record ApiGouvFeature(
         String type,
-        GouvAdressDto properties
+        ApiGouvAddress properties
 ) {
 }
